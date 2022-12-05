@@ -34,6 +34,7 @@ public class BoardController {
     public String findAll(Model model) {
         List<BoardDTO> boardDTOList = boardService.findAll();
         model.addAttribute("boardList", boardDTOList);
+//        model.addAttribute("boardList", boardService.findAll());
         return "boardPages/boardList";
     }
 }
