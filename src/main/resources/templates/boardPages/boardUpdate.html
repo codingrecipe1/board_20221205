@@ -10,6 +10,8 @@
         }
     </style>
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <script th:src="@{/js/axios.min.js}"></script>
+<!--    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>-->
 </head>
 <body>
 <th:block th:replace="commonPages/header :: header"></th:block>
@@ -22,10 +24,42 @@
         contents: <textarea name="boardContents" cols="30" rows="10" class="form-control" th:text="${board.boardContents}"></textarea>
         <input type="hidden" name="boardHits" th:value="${board.boardHits}">
         <input type="button" value="수정" onclick="boardUpdate()" class="btn btn-primary">
+        <input type="button" value="수정(axios)" onclick="boardUpdateAxios()" class="btn btn-primary">
     </form>
 </div>
 </body>
 <script th:inline="javascript">
+    const boardUpdateAxios = () => {
+        const id = document.querySelector('input[name="id"]').value;
+        const title = document.getElementsByName("boardTitle")[0].value;
+        const writer = document.querySelector('input[name="boardWriter"]').value;
+        const pass = document.querySelector('input[name="boardPass"]').value;
+        const contents = document.querySelector('input[name="boardContents"]').value;
+        const hits = document.querySelector('input[name="boardHits"]').value;
+        const passDB = [[${board.boardPass}]];
+        if (pass == passDB) {
+            axios({
+                method: "put",
+                url: "/board/" + id,
+                data: {
+                    id: id,
+                    boardTitle: title,
+                    boardWriter: writer,
+                    boardPass: pass,
+                    boardContents: contents,
+                    boardHits: hits
+                }
+            }).then(res => {
+                console.log("수정 성공");
+                location.href = "/board/" + id;
+            }).catch(err => {
+                alert("수정 실패");
+            })
+        } else {
+            alert("비밀번호 불일치!!");
+        }
+
+    }
     const boardUpdate = () => {
         const passDB = [[${board.boardPass}]];
         const pass = document.getElementById("boardPass").value;
