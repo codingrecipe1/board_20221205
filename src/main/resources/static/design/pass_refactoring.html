@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <button class="btn btn-warning" onclick="req('update')">수정</button>
+        <button class="btn btn-danger" onclick="req('delete')">삭제</button>
+    </div>
+    <div id="pass-check">
+
+    </div>
+</body>
+<script>
+    const req = (value) => {
+        console.log("value값", value);
+        const passCheckArea = document.getElementById("pass-check");
+        passCheckArea.innerHTML = "<input type=\"text\" id=\"password\" placeholder=\"password\">\n" +
+            "        <button class=\"btn btn-outline-dark\" onclick=\"passCheck('" + value + "')\">확인</button>";
+    }
+    const passCheck = (value) => {
+        console.log(value);
+        const password = document.getElementById("password").value;
+        const passDB = "1234";
+        const id = "1";
+        if (password == passDB) {
+            if (value == "update") {
+                location.href = "/board/update/" + id;
+            } else if (value == "delete"){
+                location.href = "/board/delete/" + id;
+            }
+        } else {
+            alert("비밀번호 불일치!!");
+        }
+    }
+</script>
+</html>
+
+
+
+
+
+
+
+

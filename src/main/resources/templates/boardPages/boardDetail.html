@@ -41,8 +41,39 @@
         </tr>
     </table>
     <button class="btn btn-primary" onclick="listReq()">목록</button>
-    <button class="btn btn-warning" onclick="updateReq()">수정</button>
-    <button class="btn btn-danger" onclick="deleteReq()">삭제</button>
+    <div class="container">
+        <button class="btn btn-warning" onclick="req('update')">수정</button>
+        <button class="btn btn-danger" onclick="req('delete')">삭제</button>
+    </div>
+    <div id="pass-check">
+
+    </div>
 </div>
 </body>
+<script th:inline="javascript">
+    const listReq = () => {
+        location.href = "/board/";
+    }
+    const req = (value) => {
+        console.log("value값", value);
+        const passCheckArea = document.getElementById("pass-check");
+        passCheckArea.innerHTML = "<input type=\"text\" id=\"password\" placeholder=\"password\">\n" +
+            "        <button class=\"btn btn-outline-dark\" onclick=\"passCheck('" + value + "')\">확인</button>";
+    }
+    const passCheck = (value) => {
+        console.log(value);
+        const password = document.getElementById("password").value;
+        const passDB = [[${board.boardPass}]];
+        const id = [[${board.id}]];
+        if (password == passDB) {
+            if (value == "update") {
+                location.href = "/board/update/" + id;
+            } else if (value == "delete"){
+                location.href = "/board/delete/" + id;
+            }
+        } else {
+            alert("비밀번호 불일치!!");
+        }
+    }
+</script>
 </html>
