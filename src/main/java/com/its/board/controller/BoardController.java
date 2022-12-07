@@ -66,6 +66,18 @@ public class BoardController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable Long id) {
+        boardService.delete(id);
+        return "redirect:/board/";
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteByAxios(@PathVariable Long id) {
+        boardService.delete(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }
 
 
