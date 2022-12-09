@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>list</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <style>
+        #paging-list {
+            width: 800px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+<th:block th:replace="commonPages/header :: header"></th:block>
+<div class="container" id="paging-list">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">id</th>
+            <th scope="col">writer</th>
+            <th scope="col">title</th>
+            <th scope="col">date</th>
+            <th scope="col">hits</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="board: ${boardList}">
+            <td th:text="${board.id}"></td>
+            <td th:text="${board.boardWriter}"></td>
+            <td><a th:href="@{|/board/${board.id}|}" th:text="${board.boardTitle}">제목</a></td>
+            <td th:text="*{#temporals.format(board.boardCreatedTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td th:text="${board.boardHits}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="container">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <!--첫페이지 요청 링크-->
+                <a class="page-link" th:href="@{/board(page=1)}">
+                    <span>First</span>
+                </a>
+            </li>
+
+            <li th:class="${boardList.first} ? 'disabled'" class="page-item">
+                <!--boardList.first: isFirst()
+                    boardList.number: getNumber()-->
+                <a class="page-link" th:href="${boardList.first} ? '#' : @{/board(page=${boardList.number})}">
+                    <span><</span> <!-- < -->
+                </a>
+            </li>
+
+            <!-- startPage ~ endPage 까지 숫자를 만들어주는 역할 -->
+            <li th:each="page: ${#numbers.sequence(startPage, endPage)}"
+                th:class="${page == boardList.number + 1} ? 'page-item active'" class="page-item">
+                <a class="page-link" th:text="${page}" th:href="@{/board(page=${page})}"></a>
+            </li>
+
+            <!-- 다음 페이지 요청
+                현재 3페이지를 보고 있다면 다음 페이지는 4페이지임.
+                getNumber() 값은 2임.
+                따라서 4페이지를 보고 싶다면 getNumber()+2를 해야 컨트롤러에 4를 요청할 수 있음. -->
+            <li th:class="${boardList.last} ? 'disabled'">
+                <a class="page-link" th:href="${boardList.last} ? '#' : @{/board(page=${boardList.number + 2})}">
+                    <span>&gt;</span>
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link" th:href="@{/board(page=${boardList.totalPages})}">
+                    <span>Last</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</body>
+</html>

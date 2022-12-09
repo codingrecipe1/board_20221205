@@ -14,6 +14,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -122,6 +125,46 @@ public class BoardTest {
         commentDTO.setCommentContents("commentContents" + i);
         commentDTO.setBoardId(boardId);
         return commentDTO;
+    }
+
+    @Test
+    @Transactional
+    @Rollback(value = true)
+    @DisplayName("페이징 객체 확인")
+    public void pagingParams() {
+        int page = 0;
+        Page<BoardEntity> boardEntities = boardRepository.findAll(PageRequest.of(page, 3, Sort.by(Sort.Direction.DESC, "id")));
+        // Page 객체가 제공해주는 메서드 확인
+        System.out.println("boardEntities.getContent() = " + boardEntities.getContent()); // 요청페이지에 들어있는 데이터
+        System.out.println("boardEntities.getTotalElements() = " + boardEntities.getTotalElements()); // 전체 글갯수
+        System.out.println("boardEntities.getNumber() = " + boardEntities.getNumber()); // 요청페이지(jpa 기준)
+        System.out.println("boardEntities.getTotalPages() = " + boardEntities.getTotalPages()); // 전체 페이지 갯수
+        System.out.println("boardEntities.getSize() = " + boardEntities.getSize()); // 한페이지에 보여지는 글갯수
+        System.out.println("boardEntities.hasPrevious() = " + boardEntities.hasPrevious()); // 이전페이지 존재 여부
+        System.out.println("boardEntities.isFirst() = " + boardEntities.isFirst()); // 첫페이지인지 여부
+        System.out.println("boardEntities.isLast() = " + boardEntities.isLast()); // 마지막페이지인지 여부
+
+        // Page<BoardEntity> -> Page<BoardDTO>
+        Page<BoardDTO> boardList = boardEntities.map(
+                // boardEntities에 담긴 boardEntity 객체를 board에 담아서
+                // boardDTO 객체로 하나씩 옮겨 담는 과정
+                board -> new BoardDTO(board.getId(),
+                                        board.getBoardWriter(),
+                                        board.getBoardTitle(),
+                                        board.getCreatedTime(),
+                                        board.getBoardHits()
+                                     )
+        );
+
+        System.out.println("boardList.getContent() = " + boardList.getContent()); // 요청페이지에 들어있는 데이터
+        System.out.println("boardList.getTotalElements() = " + boardList.getTotalElements()); // 전체 글갯수
+        System.out.println("boardList.getNumber() = " + boardList.getNumber()); // 요청페이지(jpa 기준)
+        System.out.println("boardList.getTotalPages() = " + boardList.getTotalPages()); // 전체 페이지 갯수
+        System.out.println("boardList.getSize() = " + boardList.getSize()); // 한페이지에 보여지는 글갯수
+        System.out.println("boardList.hasPrevious() = " + boardList.hasPrevious()); // 이전페이지 존재 여부
+        System.out.println("boardList.isFirst() = " + boardList.isFirst()); // 첫페이지인지 여부
+        System.out.println("boardList.isLast() = " + boardList.isLast()); // 마지막페이지인지 여부
+
     }
 
 

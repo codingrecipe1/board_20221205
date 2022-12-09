@@ -6,6 +6,9 @@ import com.its.board.entity.BoardFileEntity;
 import com.its.board.repository.BoardFileRepository;
 import com.its.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,6 +89,23 @@ public class BoardService {
 
     public void delete(Long id) {
         boardRepository.deleteById(id);
+    }
+
+    public Page<BoardDTO> paging(Pageable pageable) {
+        int page = pageable.getPageNumber() - 1;
+        final int pageLimit = 3;
+        Page<BoardEntity> boardEntities = boardRepository.findAll(PageRequest.of(page, pageLimit, Sort.by(Sort.Direction.DESC, "id")));
+        Page<BoardDTO> boardList = boardEntities.map(
+                // boardEntities에 담긴 boardEntity 객체를 board에 담아서
+                // boardDTO 객체로 하나씩 옮겨 담는 과정
+                board -> new BoardDTO(board.getId(),
+                        board.getBoardWriter(),
+                        board.getBoardTitle(),
+                        board.getCreatedTime(),
+                        board.getBoardHits()
+                )
+        );
+        return boardList;
     }
 }
 
