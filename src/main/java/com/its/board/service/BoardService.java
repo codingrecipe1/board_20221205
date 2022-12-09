@@ -25,7 +25,7 @@ public class BoardService {
 
     public Long save(BoardDTO boardDTO) throws IOException {
 //        if (boardDTO.getBoardFile().isEmpty()) {
-        if (boardDTO.getBoardFile().size() == 0) {
+        if (boardDTO.getBoardFile() == null || boardDTO.getBoardFile().size() == 0 ) {
             System.out.println("파일없음");
             BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO);
             return boardRepository.save(boardEntity).getId();

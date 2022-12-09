@@ -1,10 +1,15 @@
 package com.its.board;
 
 import com.its.board.dto.BoardDTO;
+import com.its.board.dto.CommentDTO;
 import com.its.board.entity.BoardEntity;
+import com.its.board.entity.CommentEntity;
 import com.its.board.repository.BoardRepository;
+import com.its.board.repository.CommentRepository;
 import com.its.board.service.BoardService;
 import static org.assertj.core.api.Assertions.*;
+
+import com.its.board.service.CommentService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +18,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -22,6 +28,10 @@ public class BoardTest {
     private BoardService boardService;
     @Autowired
     private BoardRepository boardRepository;
+    @Autowired
+    private CommentService commentService;
+    @Autowired
+    private CommentRepository commentRepository;
 
     private BoardDTO newBoard(int i) {
         BoardDTO boardDTO = new BoardDTO();
@@ -70,6 +80,51 @@ public class BoardTest {
         // native query
         //
     }
+
+    @Test
+    @Transactional
+    @Rollback(value = true)
+    @DisplayName("댓글작성 테스트")
+    public void commentSaveTest() throws IOException {
+        // 1. 게시글 작성
+        BoardDTO boardDTO = newBoard(100);
+        Long savedId = boardService.save(boardDTO);
+        // 2. 댓글 작성
+        CommentDTO commentDTO = newComment(savedId, 1);
+        Long commentSavedId = commentService.save(commentDTO);
+        // 3. 저장된 댓글 아이디로 댓글 조회
+        CommentEntity commentEntity = commentRepository.findById(commentSavedId).get();
+        // 4. 작성자 값이 일치하는지 확인
+        assertThat(commentDTO.getCommentWriter()).isEqualTo(commentEntity.getCommentWriter());
+    }
+
+    @Test
+    @Transactional
+    @Rollback(value = true)
+    @DisplayName("댓글 목록 테스트")
+    public void commentListTest() throws IOException {
+        // 1. 게시글 작성
+        BoardDTO boardDTO = newBoard(100);
+        Long savedId = boardService.save(boardDTO);
+        // 2. 해당 게시글에 댓글 3개 작성
+        IntStream.rangeClosed(1, 3).forEach(i -> {
+            CommentDTO commentDTO = newComment(savedId, i);
+            commentService.save(commentDTO);
+        });
+        // 3. 댓글 목록 조회했을 때 목록 갯수가 3이면 테스트 통과
+        List<CommentDTO> commentDTOList = commentService.findAll(savedId);
+        assertThat(commentDTOList.size()).isEqualTo(3);
+    }
+
+    private CommentDTO newComment(Long boardId, int i) {
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setCommentWriter("commentWriter" + i);
+        commentDTO.setCommentContents("commentContents" + i);
+        commentDTO.setBoardId(boardId);
+        return commentDTO;
+    }
+
+
 }
 
 

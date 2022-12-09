@@ -1,7 +1,9 @@
 package com.its.board.controller;
 
 import com.its.board.dto.BoardDTO;
+import com.its.board.dto.CommentDTO;
 import com.its.board.service.BoardService;
+import com.its.board.service.CommentService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardController {
     private final BoardService boardService;
+    private final CommentService commentService;
 
     @GetMapping("/save")
     public String saveForm() {
@@ -42,6 +45,12 @@ public class BoardController {
     public String findById(@PathVariable Long id, Model model) {
         boardService.updateHits(id);
         BoardDTO boardDTO = boardService.findById(id);
+        List<CommentDTO> commentDTOList = commentService.findAll(id);
+        if (commentDTOList.size() > 0) {
+            model.addAttribute("commentList", commentDTOList);
+        } else {
+            model.addAttribute("commentList", "empty");
+        }
         model.addAttribute("board", boardDTO);
         return "boardPages/boardDetail";
     }
