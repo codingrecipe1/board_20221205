@@ -50,11 +50,11 @@ public class BoardController {
         Page<BoardDTO> boardDTOList = boardService.paging(pageable);
         model.addAttribute("boardList", boardDTOList);
         int blockLimit = 3;
-        int startPage = (((int)(Math.ceil((double)pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1;
+        int startPage = (((int) (Math.ceil((double) pageable.getPageNumber() / blockLimit))) - 1) * blockLimit + 1;
         int endPage = ((startPage + blockLimit - 1) < boardDTOList.getTotalPages()) ? startPage + blockLimit - 1 : boardDTOList.getTotalPages();
         // 삼항연산자
         int test = 10;
-        int num = (test > 5) ? test: 100;
+        int num = (test > 5) ? test : 100;
         if (test > 5) {
             num = test;
         } else {
@@ -112,6 +112,14 @@ public class BoardController {
     public ResponseEntity deleteByAxios(@PathVariable Long id) {
         boardService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public String search(@RequestParam("type") String type, @RequestParam("q") String q,
+                         Model model) {
+        List<BoardDTO> searchList = boardService.search(type, q);
+        model.addAttribute("boardList", searchList);
+        return "boardPages/boardList";
     }
 
 }

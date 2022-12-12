@@ -107,6 +107,26 @@ public class BoardService {
         );
         return boardList;
     }
+
+    public List<BoardDTO> search(String type, String q) {
+        // 작성자 검색
+        // select * from board_table where board_writer like '%q%';
+        List<BoardDTO> boardDTOList = new ArrayList<>();
+        List<BoardEntity> boardEntityList = null;
+        if (type.equals("boardWriter")) {
+            boardEntityList = boardRepository.findByBoardWriterContainingOrderByIdDesc(q);
+        } else if (type.equals("boardTitle")) {
+            boardEntityList = boardRepository.findByBoardTitleContainingOrderByIdDesc(q);
+        } else {
+            boardEntityList =
+                    boardRepository.findByBoardTitleContainingOrBoardWriterContainingOrderByIdDesc(q, q);
+        }
+
+        for (BoardEntity boardEntity: boardEntityList) {
+            boardDTOList.add(BoardDTO.toDTO(boardEntity));
+        }
+        return boardDTOList;
+    }
 }
 
 

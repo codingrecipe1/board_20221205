@@ -167,6 +167,20 @@ public class BoardTest {
 
     }
 
+    @Test
+    @Transactional
+    @DisplayName("검색 테스트")
+    public void searchTest() {
+        String q = "a";
+        // 제목이나 작성자에 a 가 포함된 검색
+        List<BoardEntity> boardEntityList =
+                boardRepository.findByBoardTitleContainingOrBoardWriterContainingOrderByIdDesc(q, q);
+        for (BoardEntity boardEntity: boardEntityList) {
+            BoardDTO boardDTO = BoardDTO.toDTO(boardEntity);
+            System.out.println("boardDTO = " + boardDTO);
+        }
+    }
+
 
 }
 
