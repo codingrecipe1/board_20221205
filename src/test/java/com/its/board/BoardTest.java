@@ -2,10 +2,13 @@ package com.its.board;
 
 import com.its.board.dto.BoardDTO;
 import com.its.board.dto.CommentDTO;
+import com.its.board.dto.MemberDTO;
 import com.its.board.entity.BoardEntity;
 import com.its.board.entity.CommentEntity;
+import com.its.board.entity.MemberEntity;
 import com.its.board.repository.BoardRepository;
 import com.its.board.repository.CommentRepository;
+import com.its.board.repository.MemberRepository;
 import com.its.board.service.BoardService;
 import static org.assertj.core.api.Assertions.*;
 
@@ -35,6 +38,8 @@ public class BoardTest {
     private CommentService commentService;
     @Autowired
     private CommentRepository commentRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     private BoardDTO newBoard(int i) {
         BoardDTO boardDTO = new BoardDTO();
@@ -179,6 +184,49 @@ public class BoardTest {
             BoardDTO boardDTO = BoardDTO.toDTO(boardEntity);
             System.out.println("boardDTO = " + boardDTO);
         }
+    }
+
+    @Test
+    @Transactional
+    @Rollback(value = false)
+    @DisplayName("set null 테스트")
+    public void setNullTest() throws IOException {
+        /*
+            1. 회원가입
+            2. 위에서 가입한 회원이 게시글 작성
+            3. 회원삭제
+            4. board_table 확인
+         */
+
+        // 1.
+        MemberDTO memberDTO = new MemberDTO();
+        memberDTO.setMemberEmail("email30");
+        memberDTO.setMemberPassword("password1");
+        memberDTO.setMemberName("name1");
+        memberDTO.setMemberAge(11);
+        memberDTO.setMemberPhone("010-1111-1111");
+
+        MemberEntity memberEntity = MemberEntity.toSaveEntity(memberDTO);
+        Long memberId = memberRepository.save(memberEntity).getId();
+
+        // 2.
+        BoardDTO newBoard = new BoardDTO();
+        newBoard.setBoardWriter(memberDTO.getMemberEmail());
+        newBoard.setBoardTitle("회원 삭제용 제목");
+        newBoard.setBoardPass("회원 삭제용 비번");
+        newBoard.setBoardContents("회원 삭제용 내용");
+        Long savedId = boardService.save(newBoard);
+
+        // 3.
+//        memberRepository.deleteById(memberId);
+//        memberDelete(memberId);
+    }
+
+    @Test
+    @Transactional
+    @Rollback(value = false)
+    public void memberDelete() {
+        memberRepository.deleteById(26L);
     }
 
 

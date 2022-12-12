@@ -3,8 +3,10 @@ package com.its.board.service;
 import com.its.board.dto.BoardDTO;
 import com.its.board.entity.BoardEntity;
 import com.its.board.entity.BoardFileEntity;
+import com.its.board.entity.MemberEntity;
 import com.its.board.repository.BoardFileRepository;
 import com.its.board.repository.BoardRepository;
+import com.its.board.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,22 +27,25 @@ import java.util.Optional;
 public class BoardService {
     private final BoardRepository boardRepository;
     private final BoardFileRepository boardFileRepository;
+    private final MemberRepository memberRepository;
 
     public Long save(BoardDTO boardDTO) throws IOException {
+        MemberEntity memberEntity =
+                memberRepository.findByMemberEmail(boardDTO.getBoardWriter()).get();
 //        if (boardDTO.getBoardFile().isEmpty()) {
-        if (boardDTO.getBoardFile() == null || boardDTO.getBoardFile().size() == 0 ) {
+        if (boardDTO.getBoardFile() == null || boardDTO.getBoardFile().size() == 0) {
             System.out.println("파일없음");
-            BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO);
+            BoardEntity boardEntity = BoardEntity.toSaveEntity(boardDTO, memberEntity);
             return boardRepository.save(boardEntity).getId();
         } else {
             System.out.println("파일있음");
             // 게시글 정보를 먼저 저장하고 해당 게시글의 entity를 가져옴
-            BoardEntity boardEntity = BoardEntity.toSaveFileEntity(boardDTO);
+            BoardEntity boardEntity = BoardEntity.toSaveFileEntity(boardDTO, memberEntity);
             Long savedId = boardRepository.save(boardEntity).getId();
             BoardEntity entity = boardRepository.findById(savedId).get();
             // 파일이 담긴 list를 반복문으로 접근하여 하나씩 이름 가져오고, 저장용 이름 만들고
             // 로컬 경로에 저장하고 board_file_table에 저장
-            for (MultipartFile boardFile: boardDTO.getBoardFile()) {
+            for (MultipartFile boardFile : boardDTO.getBoardFile()) {
 //                MultipartFile boardFile = boardDTO.getBoardFile();
                 String originalFileName = boardFile.getOriginalFilename();
                 String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
@@ -58,7 +63,7 @@ public class BoardService {
     public List<BoardDTO> findAll() {
         List<BoardEntity> boardEntityList = boardRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<BoardDTO> boardDTOList = new ArrayList<>();
-        for (BoardEntity boardEntity: boardEntityList) {
+        for (BoardEntity boardEntity : boardEntityList) {
             BoardDTO boardDTO = BoardDTO.toDTO(boardEntity);
             boardDTOList.add(boardDTO);
         }
@@ -122,7 +127,7 @@ public class BoardService {
                     boardRepository.findByBoardTitleContainingOrBoardWriterContainingOrderByIdDesc(q, q);
         }
 
-        for (BoardEntity boardEntity: boardEntityList) {
+        for (BoardEntity boardEntity : boardEntityList) {
             boardDTOList.add(BoardDTO.toDTO(boardEntity));
         }
         return boardDTOList;
